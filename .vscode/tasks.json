@@ -1,0 +1,126 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Postgres",
+            "type": "shell",
+            "command": "podman compose up -d",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Stop Postgres",
+            "type": "shell",
+            "command": "podman compose down",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Restart Postgres",
+            "type": "shell",
+            "command": "podman compose restart",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "View Logs",
+            "type": "shell",
+            "command": "podman compose logs -f db",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Backup Volume",
+            "type": "shell",
+            "command": "if (-not (Test-Path -Path .\\backups)) { New-Item -ItemType Directory -Path .\\backups }; podman volume export pgdata > .\\backups\\postgres_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss').tar",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Restore Latest Backup (DANGER)",
+            "type": "shell",
+            "command": "$latest=(Get-ChildItem -Path .\\backups\\postgres_backup_*.tar | Sort-Object LastWriteTime -Descending | Select-Object -First 1); if (-not $latest) { Write-Host 'No backup found in .\\backups'; exit 1 }; podman compose down; podman volume rm pgdata -f; podman volume create pgdata; podman run --rm -v ${PWD}\\backups:/backups -v pgdata:/data busybox sh -c \"tar xvf /backups/$($latest.Name) -C /data\"; podman compose up -d",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Create Database (appdb)",
+            "type": "shell",
+            "command": "podman compose exec db psql -U ${env:POSTGRES_USER} -c \"CREATE DATABASE appdb;\"",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Show DB Sizes",
+            "type": "shell",
+            "command": "podman compose exec db psql -U ${env:POSTGRES_USER} -At -c \"SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database;\"",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "List Volumes",
+            "type": "shell",
+            "command": "podman volume ls",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "psql Shell",
+            "type": "shell",
+            "command": "podman compose exec db psql -U ${env:POSTGRES_USER} -d ${env:POSTGRES_DB}",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean All (DANGER: removes volume)",
+            "type": "shell",
+            "command": "podman compose down -v",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

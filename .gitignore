@@ -1,0 +1,3 @@
+# Ignore host-mounted Postgres data directory when using a host bind mount
+pgdata/
+.env
