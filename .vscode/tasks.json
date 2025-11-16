@@ -56,19 +56,19 @@
             },
             "problemMatcher": []
         },
-{
-    "label": "Restore Latest Backup (DANGER)",
-    "type": "shell",
-    "command": "./scripts/restore_db.ps1",
-    "group": "none",
-    "presentation": {
-        "reveal": "always",
-        "panel": "new"
-    },
-    "problemMatcher": []
-},
         {
-            "label": "Create Database (appdb) - Process",
+            "label": "Restore Latest Backup (DANGER)",
+            "type": "shell",
+            "command": "./scripts/restore_db.ps1",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Create Database",
             "type": "process",
             "command": "podman",
             "args": [
@@ -79,7 +79,7 @@
                 "-U",
                 "postgres",
                 "-c",
-                "CREATE DATABASE appdb;"
+                "CREATE DATABASE ${input:database};"
             ],
             "group": "none",
             "presentation": {
@@ -157,6 +157,11 @@
             "description": "Enter Postgres Database",
             "default": "postgres"
         },
-        
+        {
+            "id": "database",
+            "type": "promptString",
+            "description": "Enter name of database to create",
+            "default": "appdb"
+        }
     ]
 }
