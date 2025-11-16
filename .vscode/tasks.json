@@ -48,7 +48,7 @@
         {
             "label": "Backup Volume",
             "type": "shell",
-            "command": "if (-not (Test-Path -Path .\\backups)) { New-Item -ItemType Directory -Path .\\backups }; podman volume export pgdata > .\\backups\\postgres_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss').tar",
+            "command": "if (-not (Test-Path -Path .\\backups)) { New-Item -ItemType Directory -Path .\\backups }; podman volume export postgres_pgdata -o .\\backups\\postgres_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss').tar",
             "group": "none",
             "presentation": {
                 "reveal": "always",
@@ -56,21 +56,31 @@
             },
             "problemMatcher": []
         },
+{
+    "label": "Restore Latest Backup (DANGER)",
+    "type": "shell",
+    "command": "./scripts/restore_db.ps1",
+    "group": "none",
+    "presentation": {
+        "reveal": "always",
+        "panel": "new"
+    },
+    "problemMatcher": []
+},
         {
-            "label": "Restore Latest Backup (DANGER)",
-            "type": "shell",
-            "command": "$latest=(Get-ChildItem -Path .\\backups\\postgres_backup_*.tar | Sort-Object LastWriteTime -Descending | Select-Object -First 1); if (-not $latest) { Write-Host 'No backup found in .\\backups'; exit 1 }; podman compose down; podman volume rm pgdata -f; podman volume create pgdata; podman run --rm -v ${PWD}\\backups:/backups -v pgdata:/data busybox sh -c \"tar xvf /backups/$($latest.Name) -C /data\"; podman compose up -d",
-            "group": "none",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Create Database (appdb)",
-            "type": "shell",
-            "command": "podman compose exec db psql -U ${env:POSTGRES_USER} -c \"CREATE DATABASE appdb;\"",
+            "label": "Create Database (appdb) - Process",
+            "type": "process",
+            "command": "podman",
+            "args": [
+                "compose",
+                "exec",
+                "db",
+                "psql",
+                "-U",
+                "postgres",
+                "-c",
+                "CREATE DATABASE appdb;"
+            ],
             "group": "none",
             "presentation": {
                 "reveal": "always",
@@ -80,8 +90,19 @@
         },
         {
             "label": "Show DB Sizes",
-            "type": "shell",
-            "command": "podman compose exec db psql -U ${env:POSTGRES_USER} -At -c \"SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database;\"",
+            "type": "process",
+            "command": "podman",
+            "args": [
+                "compose",
+                "exec",
+                "db",
+                "psql",
+                "-U",
+                "${input:postgresUser}",
+                "-At",
+                "-c",
+                "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database;"
+            ],
             "group": "none",
             "presentation": {
                 "reveal": "always",
@@ -103,7 +124,7 @@
         {
             "label": "psql Shell",
             "type": "shell",
-            "command": "podman compose exec db psql -U ${env:POSTGRES_USER} -d ${env:POSTGRES_DB}",
+            "command": "podman compose exec db psql -U ${input:postgresUser} -d ${env:POSTGRES_DB}",
             "group": "none",
             "presentation": {
                 "reveal": "always",
@@ -122,5 +143,20 @@
             },
             "problemMatcher": []
         }
+    ],
+    "inputs": [
+        {
+            "id": "postgresUser",
+            "type": "promptString",
+            "description": "Enter Postgres User",
+            "default": "postgres"
+        },
+        {
+            "id": "postgresDB",
+            "type": "promptString",
+            "description": "Enter Postgres Database",
+            "default": "postgres"
+        },
+        
     ]
 }
