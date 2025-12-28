@@ -142,6 +142,72 @@
                 "panel": "new"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Helm: Lint",
+            "type": "shell",
+            "command": "helm lint ./chart",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Helm: Template",
+            "type": "shell",
+            "command": "helm template ./chart",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Helm: Install",
+            "type": "shell",
+            "command": "helm install postgres ./chart",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Helm: Upgrade",
+            "type": "shell",
+            "command": "helm upgrade postgres ./chart",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Helm: Uninstall",
+            "type": "shell",
+            "command": "helm uninstall postgres",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Helm: Status",
+            "type": "shell",
+            "command": "helm status postgres",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
         }
     ],
     "inputs": [
